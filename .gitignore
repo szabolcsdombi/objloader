@@ -1,0 +1,11 @@
+/.pytest_cache
+/.vscode
+/.cache
+/build
+/dist
+/venv
+
+*.egg-info
+*.bat
+*.pyc
+*.pyd
