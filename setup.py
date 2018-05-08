@@ -10,7 +10,7 @@ setup(
     author='Szabolcs Dombi',
     author_email='cprogrammer1994@gmail.com',
     license='MIT',
-    install_requires=['ModernGL'],
+    install_requires=['ModernGL', 'numpy'],
     packages=['objloader'],
     platforms=['any']
 )

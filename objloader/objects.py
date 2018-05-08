@@ -2,6 +2,8 @@ import logging
 import re
 import struct
 
+import numpy as np
+
 log = logging.getLogger(__file__)
 
 RE_COMMENT = re.compile(r'#[^\n]*\n', flags=re.M)
@@ -201,3 +203,13 @@ class Obj:
             result += packer(vx, vy, vz, tx, ty, tz, nx, ny, nz)
 
         return bytes(result)
+
+    def to_array(self) -> np.array:
+        return np.array([
+            [
+                *(self.vert[v - 1]),
+                *(self.norm[n - 1] if n is not None else (0.0, 0.0, 0.0)),
+                *(self.text[t - 1] if t is not None else (0.0, 0.0, 0.0)),
+            ]
+            for v, t, n in self.face
+        ], dtype='f4')
