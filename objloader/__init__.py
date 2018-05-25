@@ -18,7 +18,8 @@ RE_COMMENT = re.compile(r'#[^\n]*\n', flags=re.M)
 RE_VERT = re.compile(r'^v\s+(-?\d+(?:\.\d+)?(?:[Ee]-?\d+)?)\s+(-?\d+(?:\.\d+)?(?:[Ee]-?\d+)?)\s+(-?\d+(?:\.\d+)?(?:[Ee]-?\d+)?)$')
 RE_TEXT = re.compile(r'^vt\s+(-?\d+(?:\.\d+)?(?:[Ee]-?\d+)?)\s+(-?\d+(?:\.\d+)?(?:[Ee]-?\d+)?)(?:\s+(-?\d+(?:\.\d+)?(?:[Ee]-?\d+)?))?$')
 RE_NORM = re.compile(r'^vn\s+(-?\d+(?:\.\d+)?(?:[Ee]-?\d+)?)\s+(-?\d+(?:\.\d+)?(?:[Ee]-?\d+)?)\s+(-?\d+(?:\.\d+)?(?:[Ee]-?\d+)?)$')
-RE_FACE = re.compile(r'^f\s+(\d+)(/(\d+)?(/(\d+))?)?\s+(\d+)(/(\d+)?(/(\d+))?)?\s+(\d+)(/(\d+)?(/(\d+))?)?$')
+RE_TRIANGLE_FACE = re.compile(r'^f\s+(\d+)(/(\d+)?(/(\d+))?)?\s+(\d+)(/(\d+)?(/(\d+))?)?\s+(\d+)(/(\d+)?(/(\d+))?)?$')
+RE_QUAD_FACE = re.compile(r'^f\s+(\d+)(/(\d+)?(/(\d+))?)?\s+(\d+)(/(\d+)?(/(\d+))?)?\s+(\d+)(/(\d+)?(/(\d+))?)?\s+(\d+)(/(\d+)?(/(\d+))?)?$')
 
 PACKER = 'lambda vx, vy, vz, tx, ty, tz, nx, ny, nz: struct.pack("%df", %s)'
 
@@ -129,7 +130,7 @@ class Obj:
                 norm.append(tuple(map(safe_float, match.groups())))
                 continue
 
-            match = RE_FACE.match(line)
+            match = RE_TRIANGLE_FACE.match(line)
 
             if match:
                 v, t, n = match.group(1, 3, 5)
@@ -139,6 +140,23 @@ class Obj:
                 v, t, n = match.group(11, 13, 15)
                 face.append((int(v), int_or_none(t), int_or_none(n)))
                 continue
+            
+            match = RE_QUAD_FACE.match(line)
+            if match:
+                # we convert the face in two triangles
+                v, t, n = match.group(1, 3, 5)
+                face.append((int(v), int_or_none(t), int_or_none(n)))
+                v, t, n = match.group(6, 8, 10)
+                face.append((int(v), int_or_none(t), int_or_none(n)))
+                v, t, n = match.group(11, 13, 15)
+                face.append((int(v), int_or_none(t), int_or_none(n)))
+                v, t, n = match.group(1, 3, 5)
+                face.append((int(v), int_or_none(t), int_or_none(n)))  
+                v, t, n = match.group(11, 13, 15)
+                face.append((int(v), int_or_none(t), int_or_none(n)))                
+                v, t, n = match.group(16, 18, 20)
+                face.append((int(v), int_or_none(t), int_or_none(n)))                
+                continue 
 
             log.debug('unknown line "%s"', line)
 
