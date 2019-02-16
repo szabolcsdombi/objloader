@@ -1,1 +1,3 @@
-This folder compares "objloader's" features against Microsoft's 3D Viewer benchmark.
+This folder compares "objloader's" features against Microsoft's "3D Viewer" benchmark.
+
+The "3D Viewer" is on the left, objloader is on the right.
