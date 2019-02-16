@@ -1,7 +1,7 @@
 '''
     This is a testbed for various "objloader"'s features.
 
-    Uses objloader itself together with ModenGL package and "example_window.py" Qt facilitator.
+    Uses "objloader" together with "ModernGL" packages and "example_window.py" Qt facilitator.
 
     For contributing code see: https://github.com/cprogrammer1994/ModernGL/tree/master/examples
 
@@ -11,12 +11,12 @@
 '''
 
 import os
-import moderngl
-from objloader import Obj
 from PIL import Image
 from pyrr import Matrix44, Vector3, vector, Quaternion
 import numpy as np
 
+import moderngl
+from objloader import Obj
 from example_window import Example, run_example
 
 
@@ -87,16 +87,15 @@ class LoadingOBJ(Example):
         self.vbo = self.ctx.buffer(self.obj.pack('vx vy vz nx ny nz tx ty'))
         self.vao = self.ctx.simple_vertex_array(self.prog, self.vbo, 'in_vert', 'in_norm', 'in_text')
 
+
     def render(self):
-        width, height = self.wnd.size
-        self.ctx.viewport = self.wnd.viewport
         self.ctx.clear(1.0, 1.0, 1.0)
         self.ctx.enable(moderngl.DEPTH_TEST)
 
         _field_of_view_degrees = 30.0
         _z_near = 0.1
         _z_far = 100
-        _screen_ratio = width / height
+        _screen_ratio = self.wnd.size[0] / self.wnd.size[1]
 
         #building proj matrix
         proj = Matrix44.perspective_projection(
@@ -119,22 +118,22 @@ class LoadingOBJ(Example):
         _rotate_camera_vertically_rad = float(_rotate_camera_vertically_deg) * np.pi / 180
         _rotation_vertical_quat = Quaternion.from_x_rotation(_rotate_camera_vertically_rad)   
 
-        #building camera position matrix 
-        _camera_front = (
-            _rotation_vertical_quat *
-            _rotation_horizontal_quat *                                     #Rotating camera right
-            Vector3 ([0.0, 0.0, -1.0]))                                     #Camera's actual front vector
-        
+        #building vectors to describe the camera: up, front, target and position
         _camera_up = Vector3 ([0.0, 1.0, 0.0])
+
+        _camera_front = (
+            _rotation_vertical_quat *                                       #camera yaw
+            _rotation_horizontal_quat *                                     #camera pitch
+            Vector3 ([0.0, 0.0, -1.0]))                                     #camera's actual front vector
         
         _camera_position = (
-            Vector3 ([0.0, 0.0, 10.0]) +                                    #Camera's actual position vector
-            _camera_up * _move_camera_y -                                   #Shifting camera's position up
-            vector.normalize(_camera_front ^ _camera_up) * _move_camera_x   #Shifting camera's position "left"
-            )
+            Vector3 ([0.0, 0.0, 10.0]) +                                    #camera's actual position vector
+            _camera_up * _move_camera_y -                                   #shifting camera's position up
+            vector.normalize(_camera_front ^ _camera_up) * _move_camera_x)  #shifting camera's position "left"
 
-        #look at matrix
         _cameras_target = _camera_position + _camera_front
+
+        #building look_at matrix from vectors
         lookat = Matrix44.look_at(
             _camera_position,
             _cameras_target,
